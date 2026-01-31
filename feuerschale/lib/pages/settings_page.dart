@@ -15,9 +15,17 @@ class SettingsPage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Settings', style: TextStyle(fontSize: 24)),
+          Text(
+            'Settings',
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontSize: 24),
+          ),
           const SizedBox(height: 16),
           SwitchListTile(
             title: const Text('Dark Mode'),
