@@ -55,7 +55,7 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      const HomePage(),
+      HomePage(),
       SettingsPage(isDark: widget.isDark, onChanged: widget.onThemeChanged),
     ];
 
