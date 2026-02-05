@@ -101,7 +101,7 @@ class _HomePageState extends State<HomePage> {
   ) {
     return Card(
       elevation: 1.0,
-      margin: EdgeInsets.all(8.0),
+      margin: EdgeInsets.all(5.0),
       child: Container(
         decoration: BoxDecoration(color: Color.fromRGBO(49, 34, 62, 1)),
         child: InkWell(
@@ -112,12 +112,12 @@ class _HomePageState extends State<HomePage> {
             verticalDirection: VerticalDirection.down,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Center(child: Icon(icon, size: 40.0, color: Colors.white)),
-              SizedBox(height: 20.0),
+              Center(child: Icon(icon, size: 35.0, color: Colors.white)),
+              SizedBox(height: 15.0),
               Center(
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 18.0, color: Colors.white),
+                  style: TextStyle(fontSize: 14.0, color: Colors.white),
                 ),
               ),
             ],
@@ -130,7 +130,7 @@ class _HomePageState extends State<HomePage> {
   Card makeDashboardItemDisplay(String title, String value) {
     return Card(
       elevation: 1.0,
-      margin: EdgeInsets.all(8.0),
+      margin: EdgeInsets.all(5.0),
       child: Container(
         decoration: BoxDecoration(color: Color.fromRGBO(49, 34, 62, 1)),
         child: InkWell(
@@ -144,14 +144,14 @@ class _HomePageState extends State<HomePage> {
               Center(
                 child: Text(
                   value,
-                  style: TextStyle(fontSize: 28.0, color: Colors.white),
+                  style: TextStyle(fontSize: 24.5, color: Colors.white),
                 ),
               ),
-              SizedBox(height: 20.0),
+              SizedBox(height: 15.0),
               Center(
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 18.0, color: Colors.white),
+                  style: TextStyle(fontSize: 14.0, color: Colors.white),
                 ),
               ),
             ],
