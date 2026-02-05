@@ -4,41 +4,34 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 
+const currentHost = String.fromEnvironment('HOST', defaultValue: 'pi');
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
-
-  /* @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Control Panel',
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontSize: 24),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-            },
-            child: const Text('Fire Up', style: TextStyle(fontSize: 20)),
-          ),
-        ],
-      ),
-    );
-  } */
 }
 
 class _HomePageState extends State<HomePage> {
+  late Timer _timer;
+  final Map<String, double> commands = {"GetTemperature": 0};
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => _refreshCommands(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -65,7 +58,15 @@ class _HomePageState extends State<HomePage> {
                 CupertinoIcons.flame_fill,
                 () => sendEvent("FireUp"),
               ),
-              makeDashboardItemDisplay("Temperature", "20°C"),
+              makeDashboardItemDisplay(
+                "Temperature",
+                "${commands["GetTemperature"]}°C",
+              ),
+              makeDashboardItemAction(
+                "test",
+                CupertinoIcons.exclamationmark,
+                () => sendEvent("test"),
+              ),
               makeDashboardItemAction(
                 "test",
                 CupertinoIcons.exclamationmark,
@@ -143,7 +144,7 @@ class _HomePageState extends State<HomePage> {
               Center(
                 child: Text(
                   value,
-                  style: TextStyle(fontSize: 40.0, color: Colors.white),
+                  style: TextStyle(fontSize: 28.0, color: Colors.white),
                 ),
               ),
               SizedBox(height: 20.0),
@@ -159,12 +160,34 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  Future<void> _refreshCommands() async {
+    final futures = commands.keys.map((cmd) async {
+      final value = await requestEvent(cmd);
+      return MapEntry(cmd, value);
+    });
+
+    final results = await Future.wait(futures);
+
+    for (final entry in results) {
+      if (entry.value != null) {
+        commands[entry.key] = entry.value!;
+      }
+    }
+
+    if (mounted) setState(() {});
+  }
 }
 
-//sendEvent('FireUp');
+String get currentHostIP {
+  if (currentHost == 'pi') {
+    return 'http://172.17.0.1'; // = localhost (doesn't change)
+  }
+  return 'http://192.168.178.123'; // testing only!!!
+}
 
-Future<void> sendEvent(String name) async {
-  final uri = Uri.parse('http://172.17.0.1:5001/setevent');
+Future<bool?> sendEvent(String name) async {
+  final uri = Uri.parse('$currentHostIP:5001/setevent');
 
   final response = await http.post(
     uri,
@@ -172,21 +195,30 @@ Future<void> sendEvent(String name) async {
     body: jsonEncode({'name': name}),
   );
 
-  /* if (response.statusCode == 200) {
-    // success
-    print(response.body);
-  } else {
-    // error handling
-    print('Error: ${response.statusCode}');
-  } */
+  if (response.statusCode == 200) {
+    return true;
+  }
+  return null;
 }
 
-Future<void> requestEvent(String name) async {
-  final uri = Uri.parse('http://172.17.0.1:5001/setevent');
+Future<double?> requestEvent(String name) async {
+  final uri = Uri.parse('$currentHostIP:5001/getevent');
 
   final response = await http.post(
     uri,
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({'name': name}),
   );
+
+  if (response.statusCode != 200) {
+    return null;
+  }
+
+  final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+  if (data['successful'] == true) {
+    return data['value'] as double;
+  }
+
+  return null;
 }
