@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Timer _timer;
-  final Map<String, double> commands = {"GetTemperature": 0};
+  final Map<String, double> commands = {"GetTemperature": 0, "PingRequest": 0};
 
   @override
   void initState() {
@@ -63,29 +63,28 @@ class _HomePageState extends State<HomePage> {
                 "${commands["GetTemperature"]}°C",
               ),
               makeDashboardItemAction(
-                "test",
-                CupertinoIcons.exclamationmark,
-                () => sendEvent("test"),
+                "Start Ignition",
+                CupertinoIcons.bolt,
+                () => sendEvent("StartIgnition"),
               ),
               makeDashboardItemAction(
-                "test",
-                CupertinoIcons.exclamationmark,
-                () => sendEvent("test"),
+                "Stop Ignition",
+                CupertinoIcons.xmark_circle,
+                () => sendEvent("EndIgnition"),
               ),
               makeDashboardItemAction(
-                "test",
-                CupertinoIcons.exclamationmark,
-                () => sendEvent("test"),
+                "Rotate Sticks",
+                CupertinoIcons.arrow_clockwise,
+                () => sendEvent("SetStickRotation", value: 100),
               ),
               makeDashboardItemAction(
-                "test",
-                CupertinoIcons.exclamationmark,
-                () => sendEvent("test"),
+                "Stop Sticks",
+                CupertinoIcons.stop_circle,
+                () => sendEvent("SetStickRotation", value: 0),
               ),
-              makeDashboardItemAction(
-                "test",
-                CupertinoIcons.exclamationmark,
-                () => sendEvent("test"),
+              makeDashboardItemDisplay(
+                "Status",
+                (commands["PingRequest"] ?? 0) > 0.5 ? "Running" : "Error",
               ),
             ],
           ),
@@ -186,7 +185,7 @@ String get currentHostIP {
   return 'http://192.168.178.123'; // testing only!!!
 }
 
-Future<bool?> sendEvent(String name) async {
+Future<bool?> sendEvent(String name, {double value = 0}) async {
   final uri = Uri.parse('$currentHostIP:5001/setevent');
 
   final response = await http.post(
