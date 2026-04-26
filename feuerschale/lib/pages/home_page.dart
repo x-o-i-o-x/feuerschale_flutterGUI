@@ -15,13 +15,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Timer _timer;
-  final Map<String, double> commands = {"GetTemperature": 0, "PingRequest": 0};
+  final Map<String, double> commands = {"Heartbeat": 0};
 
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(
-      const Duration(seconds: 1),
+      const Duration(seconds: 5),
       (_) => _refreshCommands(),
     );
   }
@@ -58,29 +58,34 @@ class _HomePageState extends State<HomePage> {
                 CupertinoIcons.flame_fill,
                 () => sendEvent("FireUp"),
               ),
-              makeDashboardItemDisplay(
-                "Temperature",
-                "${commands["GetTemperature"]}°C",
-              ),
+              // makeDashboardItemDisplay(
+              //   "Temperature",
+              //   "${commands["GetTemperature"]}°C",
+              // ),
               makeDashboardItemAction(
                 "Start Ignition",
                 CupertinoIcons.bolt,
-                () => sendEvent("StartIgnition"),
+                () => sendEvent("EnableFlamethrower"),
               ),
               makeDashboardItemAction(
                 "Stop Ignition",
                 CupertinoIcons.xmark_circle,
-                () => sendEvent("EndIgnition"),
+                () => sendEvent("DisableFlamethrower"),
               ),
               makeDashboardItemAction(
-                "Rotate Sticks",
+                "Rotate Sticks R",
                 CupertinoIcons.arrow_clockwise,
-                () => sendEvent("SetStickRotation", value: 100),
+                () => rotateSticks(speed: 100, direction: true),
+              ),
+              makeDashboardItemAction(
+                "Rotate Sticks L",
+                CupertinoIcons.arrow_counterclockwise,
+                () => rotateSticks(speed: 100, direction: false),
               ),
               makeDashboardItemAction(
                 "Stop Sticks",
                 CupertinoIcons.stop_circle,
-                () => sendEvent("SetStickRotation", value: 0),
+                () => rotateSticks(speed: 0),
               ),
               makeDashboardItemDisplay(
                 "Status",
@@ -220,4 +225,18 @@ Future<double?> requestEvent(String name) async {
   }
 
   return null;
+}
+
+Future<bool?> rotateSticks({double speed = 100, bool direction = false}) async {
+  bool? status = await sendEvent("SetMtrDir", value: direction ? 1.0 : 0.0);
+  if (status == null) {
+    return null;
+  }
+
+  status = await sendEvent("SetMtrSpeed", value: speed);
+  if (status == null) {
+    return null;
+  }
+
+  return true;
 }
