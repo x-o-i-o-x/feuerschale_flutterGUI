@@ -103,13 +103,18 @@ class _HomePageState extends State<HomePage> {
     IconData icon,
     VoidCallback onTap,
   ) {
+    const baseColor = Color.fromRGBO(49, 34, 62, 1);
+    const brightColor = Color.fromRGBO(80, 55, 100, 1);
+
     return Card(
       elevation: 1.0,
       margin: EdgeInsets.all(5.0),
-      child: Container(
-        decoration: BoxDecoration(color: Color.fromRGBO(49, 34, 62, 1)),
+      child: Material(
+        color: baseColor,
         child: InkWell(
           onTap: onTap,
+          splashColor: brightColor.withValues(alpha: 0.6),
+          highlightColor: brightColor, // shown while finger is held down
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
