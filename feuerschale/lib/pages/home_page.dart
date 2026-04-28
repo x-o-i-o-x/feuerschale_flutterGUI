@@ -15,7 +15,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Timer _timer;
-  final Map<String, double> commands = {"Heartbeat": 0};
+  final Map<String, List<double>> commands = {
+    "Heartbeat": [0, 0, 0, 0, 0, 0, 0, 0],
+  };
 
   @override
   void initState() {
@@ -88,8 +90,12 @@ class _HomePageState extends State<HomePage> {
                 () => rotateSticks(speed: 0),
               ),
               makeDashboardItemDisplay(
-                "Status",
-                (commands["PingRequest"] ?? 0) > 0.5 ? "Running" : "Error",
+                "Status Motor",
+                getDeviceState(commands["Heartbeat"]?[0]),
+              ),
+              makeDashboardItemDisplay(
+                "Status Flame",
+                getDeviceState(commands["Heartbeat"]?[1]),
               ),
             ],
           ),
@@ -210,7 +216,7 @@ Future<bool?> sendEvent(String name, {double value = 0}) async {
   return null;
 }
 
-Future<double?> requestEvent(String name) async {
+Future<List<double>?> requestEvent(String name) async {
   final uri = Uri.parse('$currentHostIP:5001/getevent');
 
   final response = await http.post(
@@ -226,7 +232,7 @@ Future<double?> requestEvent(String name) async {
   final data = jsonDecode(response.body) as Map<String, dynamic>;
 
   if (data['successful'] == true) {
-    return data['value'] as double;
+    return (data['value'] as List<dynamic>).cast<double>();
   }
 
   return null;
@@ -244,4 +250,19 @@ Future<bool?> rotateSticks({double speed = 100, bool direction = false}) async {
   }
 
   return true;
+}
+
+String getDeviceState(double? status) {
+  switch (status?.toInt()) {
+    case 1:
+      return "Offline";
+    case 2:
+      return "Booting";
+    case 3:
+      return "Preop";
+    case 4:
+      return "Operating";
+    default:
+      return "Error";
+  }
 }
